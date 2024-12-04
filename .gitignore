@@ -1,0 +1,53 @@
+# Virtual environment
+venv/
+.env/
+*.env
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Data files
+*.csv
+*.xlsx
+*.json
+*.h5
+*.pickle
+data/raw/
+data/processed/
+
+# Logs and temporary files
+*.log
+*.out
+*.tmp
+
+# macOS and Windows system files
+.DS_Store
+Thumbs.db
+
+# IDE configuration files
+.vscode/
+.idea/
+
+# Byte-compiled files
+*.so
+
+# Test output
+htmlcov/
+*.coverage
+
+# Package manager files
+*.lock
+pip-wheel-metadata/
+
+# Kaggle API key
+kaggle.json
+
+# Other
+*.tar.gz
+*.zip
