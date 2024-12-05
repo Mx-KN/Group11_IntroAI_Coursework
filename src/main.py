@@ -1,6 +1,7 @@
 from pathlib import Path
 from data_preprocessing import load_data, clean_data
 from feature_engineering import add_technical_indicators
+from plot import plot_bollinger_bands, plot_macd, plot_rsi
 
 # Define paths relative to the project root
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -35,6 +36,16 @@ def main():
     print(final_data.head())
     print(final_data.describe())
 
+    # Step 4: Display the final DataFrame
+    print("\nFinal DataFrame (First 5 Rows):")
+    print(final_data.head())
+    print("\nSummary Statistics:")
+    print(final_data.describe())
+
+    # Step 5: Plot technical indicators
+    plot_bollinger_bands(final_data)
+    plot_rsi(final_data)
+    plot_macd(final_data)
 
 
 if __name__ == "__main__":
