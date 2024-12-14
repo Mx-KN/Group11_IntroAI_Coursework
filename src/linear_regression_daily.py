@@ -1,7 +1,13 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, precision_score, recall_score, classification_report
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score,
+    classification_report, ConfusionMatrixDisplay
+)
+import numpy as np
+
 
 def run_daily_linear_regression(file_path, threshold=0.6):
     """
@@ -24,44 +30,54 @@ def run_daily_linear_regression(file_path, threshold=0.6):
 
     # Clean the data
     print("Cleaning Bitcoin data...")
-    data['Date'] = pd.to_datetime(data['Date'])  # Convert Date to datetime
-    data.dropna(inplace=True)  # Drop missing values
+    data['Date'] = pd.to_datetime(data['Date'], errors='coerce')  # Convert Date to datetime
+    data.dropna(subset=['Date'], inplace=True)  # Remove rows with invalid dates
     data = data[['Date', 'Open', 'High', 'Low', 'Close', 'Volume']]  # Keep relevant columns
-    print("Data cleaning complete.")
+    print(f"Data cleaned. Total rows: {len(data)}")
 
     # Add technical indicators
     print("Adding technical indicators...")
+    
+    # Moving averages
     data['SMA_10'] = data['Close'].rolling(window=10).mean()
     data['SMA_50'] = data['Close'].rolling(window=50).mean()
+    data['SMA_200'] = data['Close'].rolling(window=200).mean()
     data['EMA_10'] = data['Close'].ewm(span=10, adjust=False).mean()
+    data['EMA_50'] = data['Close'].ewm(span=50, adjust=False).mean()
 
-    # RSI
-    delta = data['Close'].diff()
-    gain = delta.where(delta > 0, 0).rolling(window=14).mean()
-    loss = -delta.where(delta < 0, 0).rolling(window=14).mean()
-    rs = gain / loss
-    data['RSI'] = 100 - (100 / (1 + rs))
+    # Crossovers
+    data['SMA_10_50_Crossover'] = data['SMA_10'] - data['SMA_50']
+    data['SMA_50_200_Crossover'] = data['SMA_50'] - data['SMA_200']
+    data['EMA_10_50_Crossover'] = data['EMA_10'] - data['EMA_50']
 
-    # MACD
-    short_ema = data['Close'].ewm(span=12, adjust=False).mean()
-    long_ema = data['Close'].ewm(span=26, adjust=False).mean()
-    data['MACD'] = short_ema - long_ema
-
-    # Bollinger Bands
-    data['BB_Mid'] = data['Close'].rolling(window=20).mean()
-    data['BB_Upper'] = data['BB_Mid'] + (2 * data['Close'].rolling(window=20).std())
-    data['BB_Lower'] = data['BB_Mid'] - (2 * data['Close'].rolling(window=20).std())
-
-    print("Technical indicators added.")
-
+    # Trend-based features
+    data['Trend_SMA_10'] = data['Close'] / data['SMA_10']
+    data['Trend_SMA_50'] = data['Close'] / data['SMA_50']
+    data['Trend_SMA_200'] = data['Close'] / data['SMA_200']
+    
+    # Momentum and volatility
+    data['Momentum'] = data['Close'] - data['Close'].shift(1)
+    data['Volatility'] = (data['High'] - data['Low']) / data['Close']
+    
     # Drop rows with insufficient data for indicators
     data.dropna(inplace=True)
+    print(f"Data after adding technical indicators: {len(data)} rows")
+
+    # Debug plot: Where the price sits relative to SMA_200
+    plt.figure(figsize=(10, 5))
+    plt.plot(data['Date'], data['Trend_SMA_200'], label='Close / SMA_200', color='orange')
+    plt.axhline(1, linestyle='--', color='red', label='Neutral Zone (1)')
+    plt.title("Price Position Relative to SMA_200")
+    plt.xlabel("Date")
+    plt.ylabel("Relative Value")
+    plt.legend()
+    plt.show()
 
     # Create binary target column
     print("Creating binary target column...")
-    data['Target'] = (data['Close'].shift(-1) > data['Close']).astype(int)
+    data['Target'] = (data['Close'].shift(-1) > data['Close']).astype(int)  # 1 if price increases
     data.dropna(inplace=True)  # Drop rows with invalid target
-    print("Binary target column created.")
+    print(f"Target column created. Target distribution:\n{data['Target'].value_counts()}")
 
     # Define features and split the data
     features = data.columns.difference(['Date', 'Close', 'Target'])
@@ -80,21 +96,24 @@ def run_daily_linear_regression(file_path, threshold=0.6):
     # Evaluate the model
     print("Evaluating the model...")
     y_pred_proba = model.predict_proba(X_test)[:, 1]
-    print(f"Using decision threshold: {threshold}")
     y_pred = (y_pred_proba > threshold).astype(int)
+
     accuracy = accuracy_score(y_test, y_pred)
-    precision = precision_score(y_test, y_pred)
-    recall = recall_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall = recall_score(y_test, y_pred, zero_division=0)
 
     print(f"Accuracy: {accuracy:.4f}")
     print(f"Precision: {precision:.4f}")
     print(f"Recall: {recall:.4f}")
     print("\nClassification Report:")
-    print(classification_report(y_test, y_pred))
-    print(data['Target'].value_counts())
-    print("Feature Correlation with Target:")
-    print(data.corr()['Target'])
+    print(classification_report(y_test, y_pred, zero_division=0))
 
+    # Debugging plot: Confusion Matrix
+    ConfusionMatrixDisplay.from_estimator(model, X_test, y_test, display_labels=["Decrease", "Increase"])
+    plt.title("Confusion Matrix")
+    plt.show()
 
-
-    print("Daily linear regression pipeline complete.")
+    # Feature correlation
+    print("\nFeature Correlation with Target:")
+    print(data.corr()['Target'].sort_values(ascending=False))
+    print("\nDaily linear regression pipeline complete.")
