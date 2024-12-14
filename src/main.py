@@ -86,12 +86,10 @@ import linear_regression_daily
 
 
 
-# if __name__ == "__main__":
-#     main()
-
 
 from pathlib import Path
 from linear_regression_daily import run_daily_linear_regression
+from linear_regression_weekly_monthly import run_linear_regression_classification
 
 def main():
     """
@@ -104,9 +102,16 @@ def main():
     print("Running daily linear regression classification...")
     try:
         # Call the daily linear regression pipeline
-        run_daily_linear_regression(RAW_FILE, threshold=0.5)
+        run_linear_regression_classification(RAW_FILE, freq='W', threshold=0.5)
+
+        # Run for monthly prediction
+        run_linear_regression_classification(RAW_FILE, freq='ME', threshold=0.5)
+
     except Exception as e:
         print(f"Error running daily linear regression: {e}")
 
 if __name__ == "__main__":
     main()
+
+
+
