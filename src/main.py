@@ -13,13 +13,12 @@ def main():
 
     print("Running daily linear regression classification...")
     try:
-        run_daily_linear_regression(RAW_FILE, threshold=0.6)
+        # run_daily_linear_regression(RAW_FILE, threshold=0.6)
 
         # # Call the daily linear regression pipeline
-        # run_linear_regression_classification(RAW_FILE, freq='W', threshold=0.5)
+        run_linear_regression_classification(RAW_FILE, threshold=0.4, sample_size=100)
 
-        # # Run for monthly prediction
-        # run_linear_regression_classification(RAW_FILE, freq='ME', threshold=0.5)
+
 
     except Exception as e:
         print(f"Error running daily linear regression: {e}")
