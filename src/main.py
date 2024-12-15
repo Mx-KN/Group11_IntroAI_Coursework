@@ -1,7 +1,11 @@
-import linear_regression_daily
 from pathlib import Path
-from linear_regression_daily import run_daily_linear_regression
-from linear_regression_weekly_monthly import run_linear_regression_classification
+
+from linear_regression_v2 import process_and_train_binary_classification
+from test import process_and_train_binary_classification
+
+from random_forest import process_and_train_random_forest
+
+
 
 def main():
     """
@@ -13,18 +17,19 @@ def main():
 
     print("Running daily linear regression classification...")
     try:
-        # run_daily_linear_regression(RAW_FILE, threshold=0.6)
+      
+        process_and_train_random_forest(RAW_FILE)
 
-        # # Call the daily linear regression pipeline
-        run_linear_regression_classification(RAW_FILE, threshold=0.4, sample_size=100)
-
-
+        process_and_train_binary_classification(
+        RAW_FILE,
+        test_size=0.3,
+        random_state=42,
+        lookahead_days=30
+    )
 
     except Exception as e:
         print(f"Error running daily linear regression: {e}")
 
+
 if __name__ == "__main__":
     main()
-
-
-
