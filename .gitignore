@@ -13,12 +13,10 @@ __pycache__/
 .ipynb_checkpoints/
 
 # Data files
-*.csv
 *.xlsx
 *.json
 *.h5
 *.pickle
-data/raw/
 data/processed/
 
 # Logs and temporary files
