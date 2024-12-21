@@ -15,14 +15,14 @@ def main():
 
     print("Running daily linear regression classification...")
     try:
-        model, metrics = process_and_train_binary_classification(
-            csv_path=str(RAW_FILE),  # Convert RAW_FILE to a string
-            test_size=0.3,
-            random_state=42,
-            lookahead_days=7
-        )
+        # model, metrics = process_and_train_binary_classification(
+        #     csv_path=str(RAW_FILE),  # Convert RAW_FILE to a string
+        #     test_size=0.3,
+        #     random_state=42,
+        #     lookahead_days=60
+        # )
       
-        # process_and_train_random_forest(RAW_FILE)
+        process_and_train_random_forest(RAW_FILE)
 
 
     except Exception as e:
