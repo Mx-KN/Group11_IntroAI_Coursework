@@ -1,8 +1,6 @@
 from pathlib import Path
 
 from linear_regression_v2 import process_and_train_binary_classification
-from test import process_and_train_binary_classification
-
 from random_forest import process_and_train_random_forest
 
 
@@ -17,15 +15,15 @@ def main():
 
     print("Running daily linear regression classification...")
     try:
+        # model, metrics = process_and_train_binary_classification(
+        #     csv_path=str(RAW_FILE),  # Convert RAW_FILE to a string
+        #     test_size=0.3,
+        #     random_state=42,
+        #     lookahead_days=60
+        # )
       
         process_and_train_random_forest(RAW_FILE)
 
-        process_and_train_binary_classification(
-        RAW_FILE,
-        test_size=0.3,
-        random_state=42,
-        lookahead_days=30
-    )
 
     except Exception as e:
         print(f"Error running daily linear regression: {e}")
